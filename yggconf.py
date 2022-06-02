@@ -12,6 +12,9 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from email.message import Message
+import urllib.parse
+import socket
+import re
 
 
 # Http request logic without requests lib
@@ -95,11 +98,47 @@ def request(
 PEERS_LIST_URL = "https://raw.githubusercontent.com/DomesticMoth/MPL/main/yggdrasil.txt"
 
 
-def fetch_peers() -> str:
+def fetch_peers():
     resp = request(PEERS_LIST_URL, )
     if resp.status != 200:
         raise Exception("Cannot get peers list; status code: {}".format(resp.status))
-    return resp.body
+    peers = []
+    for row in resp.body.split("\n"):
+        if len(row) == 0:
+            continue
+        if row[0] == "#":
+            continue
+        peers.append(row)
+    return peers
+
+def extract_addr(peer):
+    parsed_url = urllib.parse.urlparse(peer)
+    return socket.gethostbyname(parsed_url.hostname)
+
+def extract_addrs(peers):
+    addrs = []
+    for peer in peers:
+        parsed_url = urllib.parse.urlparse(peer)
+        try:
+            addrs.append((peer, socket.gethostbyname(parsed_url.hostname)))
+        except:
+            pass
+    return addrs
+
+def deduplicate(addrs):
+    ret = {}
+    for addr in addrs:
+        key = addr[1]
+        if key in ret:
+            old_sheme = ret[key][0][:3]
+            new_sheme = addr[0][:3]
+            if new_sheme == "tls" and old_sheme == "tcp":
+                ret[key] = addr
+        else:
+            ret[key] = addr
+    return ret.values()
 
 if __name__ == "__main__":
-    print(fetch_peers())
+    addrs = deduplicate(extract_addrs(fetch_peers()))
+    for addr in addrs:
+        print(addr)
