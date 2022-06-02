@@ -150,9 +150,11 @@ def check(addrs):
         p = ping(addr[1])
         if p < 300:
             ret.append((addr[0], p))
+    ret.sort(key=lambda x: x[1])
     return ret
 
+def get_peers(count: int):
+    return [peer[0] for peer in  check(deduplicate(extract_addrs(fetch_peers())))[:count] ]
+
 if __name__ == "__main__":
-    peers = check(deduplicate(extract_addrs(fetch_peers())))
-    for peer in peers:
-        print(peer)
+    print(get_peers(10))
