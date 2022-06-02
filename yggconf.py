@@ -15,6 +15,7 @@ from email.message import Message
 import urllib.parse
 import socket
 import re
+import subprocess
 
 
 # Http request logic without requests lib
@@ -111,10 +112,6 @@ def fetch_peers():
         peers.append(row)
     return peers
 
-def extract_addr(peer):
-    parsed_url = urllib.parse.urlparse(peer)
-    return socket.gethostbyname(parsed_url.hostname)
-
 def extract_addrs(peers):
     addrs = []
     for peer in peers:
@@ -138,7 +135,24 @@ def deduplicate(addrs):
             ret[key] = addr
     return ret.values()
 
-if __name__ == "__main__":
-    addrs = deduplicate(extract_addrs(fetch_peers()))
+def ping(addr) -> float:
+    cmd = "ping {} -c 2 -w 4 -W 2".format(addr)
+    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    out = proc.stdout.read().decode("utf-8")
+    pings = [int(float(p)) for p in re.findall(r"time=(\d+(?:\.\d+)?)", out)]
+    if len(pings) < 1:
+        return 100000000
+    return int(sum(pings)/len(pings))
+
+def check(addrs):
+    ret = []
     for addr in addrs:
-        print(addr)
+        p = ping(addr[1])
+        if p < 300:
+            ret.append((addr[0], p))
+    return ret
+
+if __name__ == "__main__":
+    peers = check(deduplicate(extract_addrs(fetch_peers())))
+    for peer in peers:
+        print(peer)
