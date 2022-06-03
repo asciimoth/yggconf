@@ -16,9 +16,11 @@ import urllib.parse
 import socket
 import re
 import subprocess
+import time
+import os
+import sys
 
 
-URI_REGEX = r"[tls]://(?:[-\w.]|(?:%[\da-fA-F]{2}))+"
 PEERS_LIST_URL = "https://raw.githubusercontent.com/DomesticMoth/MPL/main/yggdrasil.txt"
 
 
@@ -199,6 +201,16 @@ def update_config(src, dst, peers_count):
     with open(dst, "w") as f:
         f.write(result)
 
+# Every $delay seconds
+# read $src file
+# add $count nearest peers to it
+# write to $dst file
+# and then run $cmd shell command
+def loop(src, dst, count, delay, cmd):
+    while True:
+        update_config(src,dst, count)
+        os.system(cmd)
+        time.sleep(delay)
 
 if __name__ == "__main__":
-    update_config("./src.hjson","./dst.hjson", 10)
+    loop(sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5])
