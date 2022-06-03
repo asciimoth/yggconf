@@ -178,11 +178,6 @@ def multireplace(string, repl) -> str:
 def add_peers(config, extra):
     repl = []
     for sub in re.finditer(r"[\s|^|{]Peers:[\s|\n]*\[[\s|\n|\w|/|:|.|,|'|\"|\?|=|-]*]", config):
-        #result += EXAMPLE_CONFIG[start:sub.start()]+"Peers: ["
-        #print(sub)
-        #print(EXAMPLE_CONFIG[sub.start():sub.end()])
-        #print(re.sub(r"\s+", " ", re.sub(r"[\n|\[|\]|'|\"]", " ", sub.group()).replace("Peers:", " ")).split(" "))
-        #result += EXAMPLE_CONFIG[sub.end():]+"]"
         already_exist_peers = extra.copy()
         for peer in re.sub(r"\s+", " ", re.sub(r"[\n|\[|\]|'|\"|,]", " ", sub.group()).replace("Peers:", " ")).split(" "):
             if len(peer) == 0:
