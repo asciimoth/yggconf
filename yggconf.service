@@ -1,0 +1,17 @@
+[Unit]
+Description=Yggdrasil autoconfigurator
+After=network.target
+StartLimitIntervalSec=60
+
+[Service]
+Type=idle
+KillMode=process
+Restart=always
+RestartSec=60
+User=root
+ExecStart=/usr/bin/python3 /usr/share/yggconf.py /etc/yggdrasil_raw.conf /etc/yggdrasil.conf 5 86400 "systemctl restart yggdrasil.service"
+SyslogIdentifier=yggconf
+SyslogFacility=daemon
+
+[Install]
+WantedBy=multi-user.target

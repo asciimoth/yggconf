@@ -1,0 +1,7 @@
+Package: Yggconf
+Version: 0.0.1
+Maintainer: DomesticMoth
+Section: utils
+Description: Yggdrasil autoconfigurator
+Origin: https://github.com/DomesticMoth/yggconf
+Architecture: all
