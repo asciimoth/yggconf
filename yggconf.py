@@ -156,11 +156,22 @@ def check(addrs):
     ret.sort(key=lambda x: x[1])
     return ret
 
+def getport(url):
+    return url.split("?")[0].split(":")[-1]
+
 def select_tls(peers):
     ret = []
     for peer in peers:
-        if peer.startswith("tls://") or peer.endswith(":443"):
+        print(peer, peer.startswith("tls://"), getport(peer) == "443")
+        if peer.startswith("tls://") or getport(peer) == "443":
             ret.append(peer)
+    print()
+    for r in ret:
+        print(r)
+    ret.sort(key=lambda x: -1*(int(getport(x) == "443")*2 + int(x.startswith("tls://"))))
+    print()
+    for r in ret:
+        print(r)
     return ret
 
 def get_peers(count: int, ptls: bool):
@@ -231,6 +242,7 @@ def get_bool_arg(nom: int) -> bool:
         return sys.argv[nom].lower() == "true"
     except:
         return False
+
 
 if __name__ == "__main__":
     loop(sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5], get_bool_arg(6))
