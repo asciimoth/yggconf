@@ -156,8 +156,21 @@ def check(addrs):
     ret.sort(key=lambda x: x[1])
     return ret
 
-def get_peers(count: int):
-    return [peer[0] for peer in  check(deduplicate(extract_addrs(fetch_peers())))[:count] ]
+def select_tls(peers):
+    ret = []
+    for peer in peers:
+        if peer.startswith("tls://") or peer.endswith(":443"):
+            ret.append(peer)
+    return ret
+
+def get_peers(count: int, ptls: bool):
+    all_peers = [peer[0] for peer in check(deduplicate(extract_addrs(fetch_peers())))]
+    ret = []
+    if ptls:
+        ret = select_tls(all_peers)[:count]
+    else:
+        ret = all_peers[:count]
+    return ret
 
 def multireplace(string, repl) -> str:
     if len(string) < 1:
@@ -192,8 +205,8 @@ def add_peers(config, extra):
         repl.append((sub.start(), sub.end(), "Peers:[\n"+peers+"]\n"))
     return multireplace(config, repl)
 
-def update_config(src, dst, peers_count):
-    peers = get_peers(peers_count)
+def update_config(src, dst, peers_count, ptls):
+    peers = get_peers(peers_count, ptls)
     raw = ""
     with open(src, "r") as f:
         raw = f.read()
@@ -206,11 +219,18 @@ def update_config(src, dst, peers_count):
 # add $count nearest peers to it
 # write to $dst file
 # and then run $cmd shell command
-def loop(src, dst, count, delay, cmd):
+# The ptls flag enables preference for connection on port 443 over the tls protocol
+def loop(src, dst, count, delay, cmd, ptls):
     while True:
-        update_config(src,dst, count)
+        update_config(src,dst, count, ptls)
         os.system(cmd)
         time.sleep(delay)
 
+def get_bool_arg(nom: int) -> bool:
+    try:
+        return sys.argv[nom].lower() == "true"
+    except:
+        return False
+
 if __name__ == "__main__":
-    loop(sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5])
+    loop(sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5], get_bool_arg(6))
