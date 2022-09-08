@@ -1,5 +1,5 @@
 # yggconf
-Simple python sript without dependences to ~~autoconfig yggdrasil router~~ build mesh networks  
+Simple python sript without dependences to autoconfig yggdrasil router  
 ## Usage
 Yggconf script accepts the following parameters  
 `python3 yggconf.py <src>, <dst>, <count>, <delay>, <cmd>, <ptls>`
