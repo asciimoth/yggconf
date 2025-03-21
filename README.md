@@ -15,12 +15,21 @@ Sysd service installed by Makefile will use the following parameters
 `/usr/bin/python3 /usr/share/yggconf.py /etc/yggdrasil_raw.conf /etc/yggdrasil.conf 5 86400 "systemctl restart yggdrasil.service"`
 ## Instalation
 ### On deb based
+#### With make
 ```sh
 cp -f /etc/yggdrasil.conf /etc/yggdrasil_raw.conf
 git clone https://github.com/DomesticMoth/yggconf.git
 cd yggconf
 make build-deb
 sudo make intall-deb
+```
+#### Just downloading pre-builded package
+```sh
+wget https://github.com/asciimoth/yggconf/releases/download/0.1.0/yggconf.deb
+sudo apt install ./yggconf.deb
+sudo systemctl daemon-reload
+sudo systemctl enable yggconf
+sudo systemctl start yggconf
 ```
 ### On other systems
 Just clone repo and run script  
